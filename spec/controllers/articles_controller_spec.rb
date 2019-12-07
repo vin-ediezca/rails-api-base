@@ -30,5 +30,15 @@ describe ArticlesController do
       expect(json_data.first['id']).to eq(newer_article.id.to_s)
       expect(json_data.last['id']).to eq(old_article.id.to_s)
     end
+
+    it 'should paginate results' do
+      FactoryBot.create_list :article, 3
+      get :index, params: { page: 2, per_page: 1}
+      json = JSON.parse(response.body)
+      json_data = json['data']
+      expect(json_data.length).to eq 1
+      expected_aricle = Article.recent.second.id.to_s
+      expect(json_data.first['id']).to eq(expected_aricle)
+    end
   end
 end
