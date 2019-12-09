@@ -1,4 +1,4 @@
-class ArticleSerializer
-  include FastJsonapi::ObjectSerializer
+class ArticleSerializer < ApplicationSerializer
+  set_type :articles
   attributes :title, :content, :slug
 end

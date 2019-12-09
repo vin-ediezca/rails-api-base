@@ -27,6 +27,7 @@ gem 'bootsnap', '>= 1.4.2', require: false
 
 gem 'fast_jsonapi'
 gem 'kaminari'
+gem 'pry'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
