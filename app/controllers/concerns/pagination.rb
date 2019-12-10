@@ -20,7 +20,7 @@ module Pagination
 
       @hash[:links][:self] = generate_url(page)
 
-      if (page < total_pages) && (per_page < model.count)
+      if (page < total_pages) && (per_page < model.count) && (per_page > 0)
         @hash[:links][:next] = generate_url(page >= 1 ? page + 1 : 2)
         @hash[:links][:last] = generate_url(total_pages)
       end
@@ -44,11 +44,11 @@ module Pagination
       end
 
       def include_per_page?
-        (per_page != 0) && (per_page != DEFAULT_PER_PAGE)
+        (per_page > 0) && (per_page != DEFAULT_PER_PAGE)
       end
 
       def include_page?(page)
-        (page != 0) && (page <= total_pages)
+        (page > 0) && (page <= total_pages)
       end
   end
 end

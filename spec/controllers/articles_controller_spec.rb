@@ -40,5 +40,97 @@ describe ArticlesController do
       expected_aricle = Article.recent.second.id.to_s
       expect(json_data.first['id']).to eq(expected_aricle)
     end
+
+    it 'should not include next, last, prev and first link' do
+      FactoryBot.create_list :article, 4
+      get :index
+      json = JSON.parse(response.body)
+      json_data = json['links']
+      expect(json_data.key?('next')).to eq false
+      expect(json_data.key?('last')).to eq false
+
+       get :index, params: {page: 4, per_page: 1}
+      json = JSON.parse(response.body)
+      json_data = json['links']
+      expect(json_data.key?('next')).to eq false
+      expect(json_data.key?('last')).to eq false
+
+      get :index, params: {page: -1, per_page: -1}
+      json = JSON.parse(response.body)
+      json_data = json['links']
+      expect(json_data['self']).to_not match(/page=/)
+      expect(json_data['self']).to_not match(/per_page=/)
+      expect(json_data.key?('next')).to eq false
+      expect(json_data.key?('last')).to eq false
+      expect(json_data.key?('prev')).to eq false
+      expect(json_data.key?('first')).to eq false
+
+      get :index, params: {page: 1, per_page: 1}
+      json = JSON.parse(response.body)
+      json_data = json['links']
+      expect(json_data.key?('prev')).to eq false
+      expect(json_data.key?('first')).to eq false
+
+      get :index, params: {page: 1}
+      json = JSON.parse(response.body)
+      json_data = json['links']
+      expect(json_data.key?('prev')).to eq false
+      expect(json_data.key?('first')).to eq false
+      expect(json_data.key?('next')).to eq false
+      expect(json_data.key?('last')).to eq false
+
+      get :index, params: {per_page: 1}
+      json = JSON.parse(response.body)
+      json_data = json['links']
+      expect(json_data.key?('prev')).to eq false
+      expect(json_data.key?('first')).to eq false
+
+      get :index, params: {page: 4}
+      json = JSON.parse(response.body)
+      json_data = json['links']
+      expect(json_data['self']).to_not match(/page=/)
+      expect(json_data['self']).to_not match(/per_page=/)
+      expect(json_data.key?('next')).to eq false
+      expect(json_data.key?('last')).to eq false
+      expect(json_data.key?('prev')).to eq false
+      expect(json_data.key?('first')).to eq false
+    end
+
+    it 'should include next, last, prev and first link' do
+      FactoryBot.create_list :article, 4
+      get :index, params: {page: 1, per_page: 1}
+      json = JSON.parse(response.body)
+      json_data = json['links']
+      expect(json_data.key?('next')).to eq true
+      expect(json_data['next']).to match(/page=2{1}/)
+      expect(json_data['next']).to match(/per_page=1{1}/)
+      expect(json_data.key?('last')).to eq true
+      expect(json_data['last']).to match(/page=4{1}/)
+      expect(json_data['last']).to match(/per_page=1{1}/)
+
+      get :index, params: {page: 2, per_page: 1}
+      json = JSON.parse(response.body)
+      json_data = json['links']
+      expect(json_data.key?('next')).to eq true
+      expect(json_data['next']).to match(/page=3{1}/)
+      expect(json_data['next']).to match(/per_page=1{1}/)
+      expect(json_data.key?('last')).to eq true
+      expect(json_data['last']).to match(/page=4{1}/)
+      expect(json_data['last']).to match(/per_page=1{1}/)
+      expect(json_data['prev']).to match(/page=1{1}/)
+      expect(json_data['prev']).to match(/per_page=1{1}/)
+      expect(json_data['first']).to match(/page=1{1}/)
+      expect(json_data['first']).to match(/per_page=1{1}/)
+
+      get :index, params: {per_page: 1}
+      json = JSON.parse(response.body)
+      json_data = json['links']
+      expect(json_data.key?('next')).to eq true
+      expect(json_data['next']).to match(/page=2{1}/)
+      expect(json_data['next']).to match(/per_page=1{1}/)
+      expect(json_data.key?('last')).to eq true
+      expect(json_data['last']).to match(/page=4{1}/)
+      expect(json_data['last']).to match(/per_page=1{1}/)
+    end
   end
 end
