@@ -8,3 +8,4 @@
   - `factory_bot_rails`
   - `fast_jsonapi`
   - `kaminari`
+  - `Octokit`
