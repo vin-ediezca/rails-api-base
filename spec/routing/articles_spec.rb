@@ -9,4 +9,8 @@ describe 'articles routes' do
     article = FactoryBot.create :article
     expect(get "articles/#{article.id}").to route_to('articles#show', id: "#{article.id}")
   end
+
+  it 'should route to articles create' do
+  	expect(post '/articles').to route_to('articles#create')
+  end
 end

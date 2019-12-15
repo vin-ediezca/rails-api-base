@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe User, type: :model do
   describe "#validations" do
     it 'should validate presence of attributes' do
-      user = FactoryBot.build :user
+      user = FactoryBot.create :user
       expect(user).to be_valid
 
       user = FactoryBot.build(:user, login: nil, provider: nil)

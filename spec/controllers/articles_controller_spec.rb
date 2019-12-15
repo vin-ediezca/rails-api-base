@@ -133,4 +133,88 @@ describe ArticlesController do
       expect(json_data['last']).to match(/per_page=1{1}/)
     end
   end
+
+  describe '#show' do
+    let(:article) { FactoryBot.create :article }
+    subject { get :show, params: { id: article.id } }
+
+    it 'should return success response' do
+      subject
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'should return proper json' do
+      subject
+      json = JSON.parse(response.body)
+      json_data = json['data']
+      expect(json_data['attributes']).to eq({
+        'title' => article.title,
+        'content' => article.content,
+        'slug' => article.slug
+      })
+    end
+  end
+
+  describe '#create' do
+    subject { post :create }
+
+    context 'when no code provided' do
+      it_behaves_like 'forbidden_requests'
+    end
+
+    context 'when invalid code is provided' do
+      before { request.headers['autorization'] = 'Invalid token' }
+      it_behaves_like 'forbidden_requests'
+    end
+
+    context 'when authorized' do
+      let(:access_token) { FactoryBot.create :access_token }
+      before { request.headers['authorization'] = "Bearer #{access_token.token}" }
+
+      context 'when invalid parameters provided' do
+        let(:invalid_attributes) do
+          {
+            data: {
+              attributes: {
+                title: '',
+                content: ''
+              }
+            }
+          }
+        end
+        
+        subject { post :create, params: invalid_attributes }
+
+        it 'should return 422 status code' do
+          subject
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+
+        it 'should retrun proper json' do
+          subject
+          json = JSON.parse(response.body)
+          expect(json['errors']).to include(
+            {
+              "status" => "422",
+              "source" => { "pointer" => "/data/attributes/title" },
+              "title" => "Invalid Attribute",
+              "detail" => "can't be blank"
+            },
+            {
+              "status" => "422",
+              "source" => { "pointer" => "/data/attributes/slug" },
+              "title" => "Invalid Attribute",
+              "detail" => "can't be blank"
+            },
+            {
+              "status" => "422",
+              "source" => { "pointer" => "/data/attributes/content" },
+              "title" => "Invalid Attribute",
+              "detail" => "can't be blank"
+            }
+          )
+        end
+      end
+    end
+  end
 end
