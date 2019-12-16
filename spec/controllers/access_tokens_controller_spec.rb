@@ -133,7 +133,7 @@ RSpec.describe AccessTokensController, type: :controller do
       end
 
       it 'should remove the proper access token' do
-        expect{ subject }.to change{ AccessToken.count }.by(-1)
+        expect { subject }.to change { AccessToken.count }.by(-1)
       end
     end
   end

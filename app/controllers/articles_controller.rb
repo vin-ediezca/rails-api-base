@@ -1,6 +1,6 @@
 class ArticlesController < ApplicationController
   skip_before_action :authorize!, only: [:index, :show]
-  before_action :article, only: [:show]
+  before_action :set_article, only: [:show, :update]
 
   def index                                                                            
     paginated = Article.recent.page(params[:page]).per(params[:per_page])
@@ -11,26 +11,33 @@ class ArticlesController < ApplicationController
   end
 
   def show
-    render json: article
+    render json: ArticleSerializer.new(@article)
   end
 
   def create
     article = Article.new(article_params)
 
-    if article.valid?
-      # render json: ArticleSerializer.new(article)
-    else
-      render json: ErrorSerializer.new(article).call, status: 422
-    end
+    article.save!
+    render json: ArticleSerializer.new(article), status: :created
+  rescue
+    render json: ErrorSerializer.new(article), status: :unprocessable_entity
+  end
+
+  def update
+    @article.update!(article_params)
+    render json: ArticleSerializer.new(@article), status: :ok
+  rescue
+    render json: ErrorSerializer.new(@article), status: :unprocessable_entity
   end
 
   private
-    def article
-      ArticleSerializer.new(Article.find(params[:id]))
+    def set_article
+      @article = Article.find(params[:id])
     end
 
     def article_params
-      ActionController::Parameters.new
-      # params.require(:article).allow(:title, :content, :slug)
+      params.require(:data)
+            .require(:attributes)
+            .permit(:title, :content, :slug) || ActionController::Parameters.new
     end
 end

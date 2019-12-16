@@ -2,6 +2,7 @@ class ErrorSerializer
   def initialize(model)
     @model = model
     @errors = []
+    call
   end
 
   def call
@@ -16,6 +17,10 @@ class ErrorSerializer
       end
     end
 
+    serialize
+  end
+
+  def serialize
     { errors: errors }
   end
 
