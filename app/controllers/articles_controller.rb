@@ -1,6 +1,6 @@
 class ArticlesController < ApplicationController
   skip_before_action :authorize!, only: [:index, :show]
-  before_action :set_article, only: [:show, :update]
+  before_action :set_article, only: [:show]
 
   def index                                                                            
     paginated = Article.recent.page(params[:page]).per(params[:per_page])
@@ -15,8 +15,7 @@ class ArticlesController < ApplicationController
   end
 
   def create
-    article = Article.new(article_params)
-
+    article = current_user.articles.build(article_params)
     article.save!
     render json: ArticleSerializer.new(article), status: :created
   rescue
@@ -24,10 +23,13 @@ class ArticlesController < ApplicationController
   end
 
   def update
-    @article.update!(article_params)
-    render json: ArticleSerializer.new(@article), status: :ok
+    article = current_user.articles.find(params[:id])
+    article.update!(article_params)
+    render json: ArticleSerializer.new(article), status: :ok
+  rescue ActiveRecord::RecordNotFound
+    authorization_error
   rescue
-    render json: ErrorSerializer.new(@article), status: :unprocessable_entity
+    render json: ErrorSerializer.new(article), status: :unprocessable_entity
   end
 
   private

@@ -136,6 +136,7 @@ describe ArticlesController do
 
   describe '#show' do
     let(:article) { FactoryBot.create :article }
+
     subject { get :show, params: { id: article.id } }
 
     it 'should return success response' do
@@ -251,7 +252,9 @@ describe ArticlesController do
   end
 
   describe '#update' do
-    let(:article) { FactoryBot.create :article }
+    let(:user) { FactoryBot.create :user }
+    let(:article) { FactoryBot.create :article, user: user }
+    let(:access_token) { user.create_access_token }
     
     subject { patch :update, params: { id: article.id } }
 
@@ -264,8 +267,17 @@ describe ArticlesController do
       it_behaves_like 'forbidden_requests'
     end
 
+    context 'when trying to update not owned article' do
+      let(:other_user) { create :user }
+      let(:other_article) { FactoryBot.create :article }
+
+      subject { patch :update, params: { id: other_article.id } }
+      before { request.headers['authorization'] = "Bearer #{access_token}" }
+
+      it_behaves_like 'forbidden_requests'
+    end
+
     context 'when authorized' do
-      let(:access_token) { FactoryBot.create :access_token }
       before { request.headers['authorization'] = "Bearer #{access_token.token}" }
 
       context 'when invalid parameters provided' do
