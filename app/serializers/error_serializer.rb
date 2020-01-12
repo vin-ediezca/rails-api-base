@@ -20,10 +20,10 @@ class ErrorSerializer
     serialize
   end
 
-  def serialize
-    { errors: errors }
-  end
-
   private
     attr_accessor :errors
+
+    def serialize
+      { errors: errors }
+    end
 end
